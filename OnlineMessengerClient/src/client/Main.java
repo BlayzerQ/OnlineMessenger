@@ -1,6 +1,4 @@
-package main;
-
-import client.Client;
+package client;
 
 
 public class Main {
