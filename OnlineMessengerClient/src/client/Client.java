@@ -62,28 +62,7 @@ public class Client extends JFrame {
 		textin.setParagraphAttributes(attribs, true);
 		textin.setText("Введите сообщение тут...");
 		// Обработка нажатия кнопки ввода. Ввод ip, проверка и отправка сообщения на сервер
-                textin.addKeyListener(new KeyAdapter() {
-                    @Override
-                    public void keyTyped(KeyEvent e) {
-                        if (e.getKeyCode() == KeyEvent.VK_ENTER && textin.getText() != null) {
-                            if (!isConnected) {
-                                ip = textin.getText();
-                                connect();
-                                e.consume();
-                                textin.setText(null);
-                            } else {
-                                message = textin.getText();
-                                out.println(message);
-                                e.consume();
-                                textin.setText(null);
-                                if (message.equals("exit")) {
-                                    close();
-                                    System.exit(0);
-                                }
-                            }
-                        }
-                    }
-                });
+                addKeyHandler();
 		textin.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
@@ -139,6 +118,32 @@ public class Client extends JFrame {
 			e.printStackTrace();
 		}
 	}
+	
+	private void addKeyHandler(){
+        textin.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && textin.getText() != null) {
+                    if (!isConnected) {
+                        ip = textin.getText();
+                        connect();
+                        e.consume();
+                        textin.setText(null);
+                    } else {
+                        message = textin.getText();
+                        out.println(message);
+                        e.consume();
+                        textin.setText(null);
+
+                        if (message.equals("exit")) {
+                            close();
+                            System.exit(0);
+                        }
+                    }
+                }
+            }
+        });
+    }
 
 	// Принимает все сообщения от сервера, в отдельном потоке.
 	private class Resender extends Thread {
