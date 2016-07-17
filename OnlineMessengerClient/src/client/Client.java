@@ -24,7 +24,7 @@ import java.awt.event.MouseEvent;
 
 import main.Main;
 
-public class Client extends JFrame implements KeyListener, MouseListener {
+public class Client extends JFrame {
 
 	
 	private static final long serialVersionUID = 1L;
@@ -61,8 +61,17 @@ public class Client extends JFrame implements KeyListener, MouseListener {
 		
 		textin.setParagraphAttributes(attribs, true);
 		textin.setText("Введите сообщение тут...");
-		textin.addKeyListener(this);
-		textin.addMouseListener(this);
+		// Обработка нажатия кнопки ввода. Ввод ip, проверка и отправка сообщения на сервер
+                addKeyHandler();
+		textin.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        if (textin.getText().equals("Введите сообщение тут...")) {
+                            System.out.println("TextIn!");
+                            textin.setText(null);
+                        }
+                    }
+                });
 		textin.setBackground(Color.LIGHT_GRAY);
 		panel.add(textin);
 		
@@ -109,6 +118,32 @@ public class Client extends JFrame implements KeyListener, MouseListener {
 			e.printStackTrace();
 		}
 	}
+	
+	private void addKeyHandler(){
+        textin.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && textin.getText() != null) {
+                    if (!isConnected) {
+                        ip = textin.getText();
+                        connect();
+                        e.consume();
+                        textin.setText(null);
+                    } else {
+                        message = textin.getText();
+                        out.println(message);
+                        e.consume();
+                        textin.setText(null);
+
+                        if (message.equals("exit")) {
+                            close();
+                            System.exit(0);
+                        }
+                    }
+                }
+            }
+        });
+    }
 
 	// Принимает все сообщения от сервера, в отдельном потоке.
 	private class Resender extends Thread {
@@ -129,41 +164,4 @@ public class Client extends JFrame implements KeyListener, MouseListener {
 			}
 		}
 	}
-	
-	public void mouseClicked(MouseEvent e){
-		if(textin.getText().equals("Введите сообщение тут...")){
-		textin.setText(null);
-		}
-    }
-
-	// Обработка нажатия кнопки ввода. Ввод ip, проверка и отправка сообщения на сервер
-    public void keyPressed(KeyEvent e) {
-        if(e.getKeyCode() == KeyEvent.VK_ENTER && textin.getText() != null) {
-        	
-          if(!isConnected){
-        	ip = textin.getText();
-        	connect();
-        	e.consume();
-        	textin.setText(null);
-           } else {
-        	message = textin.getText();
-        	out.println(message);
-        	e.consume();
-        	textin.setText(null);
-        	
-        	if(message.equals("exit")){
-        		close();
-        		System.exit(0);
-        	}
-        }
-        }
-    }
-    
-	public void keyTyped(KeyEvent e) {}
-    public void keyReleased(KeyEvent e) {}
-	public void mouseEntered(MouseEvent e) {}
-	public void mouseExited(MouseEvent e) {}
-	public void mousePressed(MouseEvent e) {}
-	public void mouseReleased(MouseEvent e) {}
-
 }
